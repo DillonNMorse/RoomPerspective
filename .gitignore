@@ -1,3 +1,9 @@
+Depth_Model/NYU_FCRN.ckpt.data-00000-of-00001
+Depth_Model/NYU_FCRN.ckpt.meta
+Depth_Model/runme.py
+Depth_Model/NYU_FCRN.ckpt.index
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
