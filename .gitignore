@@ -3,6 +3,8 @@ Depth_Model/NYU_FCRN.ckpt.meta
 Depth_Model/runme.py
 Depth_Model/NYU_FCRN.ckpt.index
 PlanarReconstruction/
+Images/
+Processed/
 
 
 
