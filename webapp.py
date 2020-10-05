@@ -49,7 +49,7 @@ image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 # =============================================================================
 def create_filepath(im_name, append = '', type = 'folder' ):
     
-    save_path = 'F:/RoomRotate/Processed/' 
+    save_path = 'F:/Insight/RoomPerspective/Processed/' 
     save_filepath = save_path + im_name + '/'
     
     if type == 'file':
@@ -113,7 +113,7 @@ d = main( img_filepath  = create_filepath(im_name, 'original', type = 'file'  ),
 # =============================================================================
 # Load processed image
 # =============================================================================
-image_depth = cv2.imread( create_filepath(im_name, 'depth', type = 'file') )
+image_depth = cv2.imread( create_filepath(im_name, 'depthimage2', type = 'file') )
 #image_depth = cv2.resize( image_depth, (new_width,new_height))
 
 # Display the images on the website
@@ -123,8 +123,8 @@ st.image(image_depth)
 
 
 if st.checkbox('Show room map \n (only works for nearly-rectangular rooms)'):   
-    st.text('Room is estimated to be {:.1f} feet deep.'.format(d))
-    d4 = cv2.imread(  create_filepath(im_name, 'map', type = 'file')  )
+    #st.text('Room is estimated to be {:.1f} feet deep.'.format(d))
+    d4 = cv2.imread(  create_filepath(im_name, 'map2', type = 'file')  )
     d4 = cv2.resize( d4, (new_width,new_height))
     st.image(d4)
 
