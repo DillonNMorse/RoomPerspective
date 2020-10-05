@@ -236,7 +236,7 @@ def keep_linear_only(coords, distances, num_neighbors,
     linear_regions = np.array( linear_regions )
     
             
-    return np.array( linear_regions )
+    return linear_regions
 
 
 
@@ -415,7 +415,7 @@ def get_persp_corners(boundary_coords, im_w, im_h, offs = 10, num_clus=10,
     
     from sklearn.cluster import KMeans
     
-    # Cakculate derivative at every point and cluster by slope
+    # Calculate derivative at every point and cluster by slope
     x = boundary_coords[:,0]
     y = boundary_coords[:,1]
     dydx = diff(x,y)
@@ -592,4 +592,51 @@ def make_bound_bold(bound_img):
     
     
     
+
+# =============================================================================
+#     
+# =============================================================================
+def bounding_box(points):
+
+    x_coordinates = points[:,0] 
+    y_coordinates = points[:,1]
+
+    minx = round( min(x_coordinates) )
+    maxx = round( max(x_coordinates) )
+    miny = round( min(y_coordinates) )
+    maxy = round( max(y_coordinates) )
+
+    return [minx, miny, maxx, maxy]
+
+
+
+
+# =============================================================================
+# 
+# =============================================================================
+def dominant_class(bbox, semantics ):
     
+    minx, miny, maxx, maxy = bbox
+    
+    floor = semantics[miny:maxy, minx:maxx]
+
+    unique, counts = np.unique(floor, return_counts=True)
+    count_dict = dict(zip(unique, counts))
+
+    floor_class = max(count_dict, key=count_dict.get)
+    
+    
+    return floor_class
+
+
+# =============================================================================
+# 
+# =============================================================================
+def mask_semantics(semantics, floor_class):
+    
+    masked = (semantics == floor_class).astype(int)
+    
+    return masked
+
+
+
