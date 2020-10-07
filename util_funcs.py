@@ -25,7 +25,7 @@ def load_image(img_src, rescale = False):
     
     img = cv2.imread(img_src)
     rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    
+    #rgb_img = img
     if rescale:
         rgb_img = cv2.resize(rgb_img, (w, h))
         
@@ -315,11 +315,12 @@ def interpolate_clusters(linear_coords, clusters, w = 256, h = 192):
             
             x_intersect = w
         
+      
         
         # Deal with special case of lines that have intersections too-far left.
         if x_intersect <= x_left:
-            x_intersect = x_left
-
+            x_intersect = x_left+1
+        
         x_vals = np.arange(x_left, x_intersect, 0.25)
         
         

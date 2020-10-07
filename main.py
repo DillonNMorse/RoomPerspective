@@ -51,7 +51,7 @@ CNN_w = 256
 # =============================================================================
 
 
-img_url = 'https://ssl.cdn-redfin.com/photo/102/bigphoto/289/2290289_12_K.jpg'
+img_url = 'https://ssl.cdn-redfin.com/photo/94/bigphoto/189/2653189_10_0.jpg'
 
 
 def main(img_filepath, save_filepath):
@@ -74,6 +74,9 @@ def main(img_filepath, save_filepath):
     
     w_scale = im_w/CNN_w
     h_scale = im_h/CNN_h
+    
+    fig, ax = plt.subplots(1,1)
+    ax.imshow(img)
     
     # =============================================================================
     # Only pass through CNN's if there doesn't already exist CNN output info.
@@ -310,6 +313,16 @@ def main(img_filepath, save_filepath):
     ax.invert_yaxis()
     plt.savefig(save_filepath + '_Boundary2.jpg')
     
+    fig, ax = plt.subplots(1,1)
+    ax.scatter(boundary2[:,0], boundary2[:,1],c = depth_boundary2*m_to_ft, )
+    ax.set_xlim([0,256])
+    ax.set_ylim([0,192])
+    
+    ax.invert_yaxis()
+    plt.savefig(save_filepath + '_Boundary2.jpg')   
+    
+    
+    
     # =============================================================================
     # Make plot
     # =============================================================================
@@ -385,13 +398,25 @@ def main(img_filepath, save_filepath):
     
     fig, ax = plt.subplots(1,1)
     ax.imshow(result22, cmap = 'gray_r')
+    plt.xticks([], [])
+    plt.yticks([], [])
     #plt.axis('off')
     plt.savefig(save_filepath + '_map2.jpg')    
     
     
     
+    # =========================================================================
+    # Overlay depth and original image
+    # =========================================================================
     
+    fig, ax = plt.subplots(1,1)
     
+    plot = ax.imshow(cv2.resize((depth - depth.min() )*m_to_ft, (im_w, im_h) ))
+    ax.imshow( img, alpha = 0.2 )
+    plt.axis('off')
+    plt.title('Image Depth\n(measured in feet)')
+    plt.colorbar(plot)
+    plt.savefig(save_filepath + '_depth_overlay.jpg',dpi=199)
 
 
 
@@ -433,5 +458,7 @@ if __name__ == '__main__':
     img_filepath = create_filepath(im_name, 'original', 'file')
     save_filepath = save_filepath = create_filepath(im_name)
     
+    #img_filepath = 'F:/Insight/RoomPerspective/Images/8100EUnionAve/09.jpg'
+    #save_filepath = 'F:/Insight/RoomPerspective/Processed/8100EUnionAve09/'
     
     main(img_filepath, save_filepath)

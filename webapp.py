@@ -115,24 +115,37 @@ d = main( img_filepath  = create_filepath(im_name, 'original', type = 'file'  ),
 # =============================================================================
 image_depth = cv2.imread( create_filepath(im_name, 'depthimage2', type = 'file') )
 #image_depth = cv2.resize( image_depth, (new_width,new_height))
+overlay_image = cv2.imread( create_filepath(im_name, 'depth_overlay', type = 'file') )
+overlay_image = cv2.resize( overlay_image, (round(new_width*1.2),round(new_height*1.2)))
 
 # Display the images on the website
 
+
 st.image(image_depth)
+st.image(overlay_image)
+
+
+'Top-down map view of room\n(works best on nearly-rectangular rooms).'
+
+d4 = cv2.imread(  create_filepath(im_name, 'map2', type = 'file')  )
+d4 = cv2.resize( d4, (new_width,new_height))
+st.image(d4)
 
 
 
-if st.checkbox('Show room map \n (only works for nearly-rectangular rooms)'):   
-    #st.text('Room is estimated to be {:.1f} feet deep.'.format(d))
-    d4 = cv2.imread(  create_filepath(im_name, 'map2', type = 'file')  )
-    d4 = cv2.resize( d4, (new_width,new_height))
-    st.image(d4)
-
-
-if st.checkbox('Show segmentation and depth'):   
-    d5 = cv2.imread(  create_filepath(im_name, 'Depth_and_Semantics', type = 'file')  )
-    d5 = cv2.resize( d5, (new_width,new_height))
-    st.image(d5)
+# =============================================================================
+# if st.checkbox('Show room map \n (only works for nearly-rectangular rooms)'):   
+#     #st.text('Room is estimated to be {:.1f} feet deep.'.format(d))
+#     d4 = cv2.imread(  create_filepath(im_name, 'map2', type = 'file')  )
+#     d4 = cv2.resize( d4, (new_width,new_height))
+#     st.image(d4)
+# 
+# 
+# if st.checkbox('Show segmentation and depth'):   
+#     d5 = cv2.imread(  create_filepath(im_name, 'Depth_and_Semantics', type = 'file')  )
+#     d5 = cv2.resize( d5, (new_width,new_height))
+#     st.image(d5)
+# =============================================================================
 
 
 
