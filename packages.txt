@@ -1,9 +1,9 @@
 conda create -n SpaceAce python=3.6
 
 conda install pytorch==1.4.0
+conda install tensorflow==1.14.0
 
 pip install torchvision=0.5.0
-pip install tensorflow==2.1.0
 pip install imageio
 pip install sacred
 pip install easydict
@@ -15,3 +15,6 @@ conda install pyyaml
 conda install opencv
 conda install numpy
 conda install matplotlib
+conda install scikit-learn
+
+pip install streamlit
