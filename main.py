@@ -51,7 +51,7 @@ CNN_w = 256
 # =============================================================================
 
 
-img_url = 'https://ssl.cdn-redfin.com/photo/94/bigphoto/189/2653189_10_0.jpg'
+img_url = 'https://www.hive-rd.com/blog/wp-content/uploads/2016/08/empty-room-hive-rd.com_.jpg'
 
 
 def main(img_filepath, save_filepath):
@@ -437,7 +437,7 @@ if __name__ == '__main__':
     # =============================================================================
     def create_filepath(im_name, append = '', type = 'folder' ):
         
-        save_path = 'F:/Insight/RoomPerspective/Processed/' 
+        save_path = './Processed/' 
         save_filepath = save_path + im_name + '/'
         
         if type == 'file':
@@ -458,7 +458,7 @@ if __name__ == '__main__':
     img_filepath = create_filepath(im_name, 'original', 'file')
     save_filepath = save_filepath = create_filepath(im_name)
     
-    #img_filepath = 'F:/Insight/RoomPerspective/Images/8100EUnionAve/09.jpg'
-    #save_filepath = 'F:/Insight/RoomPerspective/Processed/8100EUnionAve09/'
+    #img_filepath = 'F:/Insight/SpaceAce/Images/8100EUnionAve/09.jpg'
+    #save_filepath = 'F:/Insight/SpaceAce/Processed/8100EUnionAve09/'
     
     main(img_filepath, save_filepath)

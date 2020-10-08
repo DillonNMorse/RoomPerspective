@@ -13,20 +13,13 @@ import matplotlib.pyplot as plt
 from urllib.request import urlopen
 import numpy as np
 import os
-import re
 
 from main import main 
 
 
 
-
-
-
-
-
-
 # Add a title
-st.title('Room Perspective Visualization')
+st.title('SpaceAce')
 
 
 
@@ -49,7 +42,7 @@ image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 # =============================================================================
 def create_filepath(im_name, append = '', type = 'folder' ):
     
-    save_path = 'F:/Insight/RoomPerspective/Processed/' 
+    save_path = './Processed/' 
     save_filepath = save_path + im_name + '/'
     
     if type == 'file':
@@ -77,12 +70,6 @@ image = cv2.resize( image, (new_width,new_height))
 
 st.image(image)
 
-# =============================================================================
-# # Loading some images from my computer
-# im_path = 'F:/RoomRotate/Images/2855RockCreekCir/' 
-# im_name = '8955264_8_0.jpg' 
-# save_path = 'F:/RoomRotate/Processed/' + im_name[:-4] 
-# =============================================================================
 
 # =============================================================================
 # img_filepath = im_path + im_name
@@ -100,7 +87,6 @@ st.image(image)
 # =============================================================================
 
 
-#status_text.text('running')
 
 # =============================================================================
 # Process image
@@ -118,8 +104,11 @@ image_depth = cv2.imread( create_filepath(im_name, 'depthimage2', type = 'file')
 overlay_image = cv2.imread( create_filepath(im_name, 'depth_overlay', type = 'file') )
 overlay_image = cv2.resize( overlay_image, (round(new_width*1.2),round(new_height*1.2)))
 
-# Display the images on the website
 
+
+# =============================================================================
+# Display the images on the website
+# =============================================================================
 
 st.image(image_depth)
 st.image(overlay_image)
@@ -133,47 +122,6 @@ st.image(d4)
 
 
 
-# =============================================================================
-# if st.checkbox('Show room map \n (only works for nearly-rectangular rooms)'):   
-#     #st.text('Room is estimated to be {:.1f} feet deep.'.format(d))
-#     d4 = cv2.imread(  create_filepath(im_name, 'map2', type = 'file')  )
-#     d4 = cv2.resize( d4, (new_width,new_height))
-#     st.image(d4)
-# 
-# 
-# if st.checkbox('Show segmentation and depth'):   
-#     d5 = cv2.imread(  create_filepath(im_name, 'Depth_and_Semantics', type = 'file')  )
-#     d5 = cv2.resize( d5, (new_width,new_height))
-#     st.image(d5)
-# =============================================================================
-
-
-
-
-
-# =============================================================================
-# 
-# # Intitialize a dumb progress bar
-# progress_bar = st.sidebar.progress(0)
-# status_text = st.sidebar.empty()
-# 
-# 
-# k = random.sample( range(20,75),1)[0]
-# 
-# # Make a loop that fills the progress bar
-# for i in range(1,k):
-#     k = random.sample( range(20,75),1)[0]
-#     status_text.text('Probability Dillon actually finishes \nthis project is: {}%'.format(i))
-#     progress_bar.progress(i)
-#     sl = random.sample([0.01, 0.09, 0.2, 0.5, 1], 1)[0]
-#     time.sleep(sl)
-#     
-# # Reset bar when done    
-# progress_bar.empty()
-# 
-# # Re-run the loop
-# st.button("Re-run")
-# =============================================================================
 
 
 
