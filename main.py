@@ -51,8 +51,7 @@ CNN_w = 256
 # =============================================================================
 
 
-img_url = 'https://www.hive-rd.com/blog/wp-content/uploads/2016/08/empty-room-hive-rd.com_.jpg'
-
+img_url = 'https://photos.zillowstatic.com/fp/6480cf9360b476244455ddda8e9688ad-uncropped_scaled_within_1536_1152.webp'
 
 def main(img_filepath, save_filepath):
 
@@ -284,8 +283,8 @@ def main(img_filepath, save_filepath):
     
     lin_segments2 =  f.keep_linear_only(edge_coords2,
                                        distances2,
-                                       num_neighbors = 22,
-                                       error_thresh = 1.5,
+                                       num_neighbors = 20,
+                                       error_thresh = 1.3,
                                        slope_thresh = 1000,
                                        cut_y_val = 90,
                                       )
@@ -429,34 +428,18 @@ if __name__ == '__main__':
     image = np.asarray(bytearray(resp.read()), dtype="uint8")
     image = cv2.imdecode(image, cv2.IMREAD_COLOR)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
-    
-    
-    # =============================================================================
-    # Create a directory to store image data in
-    # =============================================================================
-    def create_filepath(im_name, append = '', type = 'folder' ):
-        
-        save_path = './Processed/' 
-        save_filepath = save_path + im_name + '/'
-        
-        if type == 'file':
-            save_filepath = save_filepath  + '_{}.jpg'.format( append )
-        
-        return save_filepath
-    
-    
+     
     
     im_name = img_url.split('/')[-1].split('.')[0]
     
-    if not os.path.exists(  create_filepath( im_name )  ):
-        os.mkdir(  create_filepath( im_name )  )
+    if not os.path.exists(  f.create_filepath( im_name )  ):
+        os.mkdir(  f.create_filepath( im_name )  )
     
-    cv2.imwrite( create_filepath(im_name, 'original', 'file'), image)
+    cv2.imwrite( f.create_filepath(im_name, 'original', 'file'), image)
     
     
-    img_filepath = create_filepath(im_name, 'original', 'file')
-    save_filepath = save_filepath = create_filepath(im_name)
+    img_filepath = f.create_filepath(im_name, 'original', 'file')
+    save_filepath = save_filepath = f.create_filepath(im_name)
     
     #img_filepath = 'F:/Insight/SpaceAce/Images/8100EUnionAve/09.jpg'
     #save_filepath = 'F:/Insight/SpaceAce/Processed/8100EUnionAve09/'

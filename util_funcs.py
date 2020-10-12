@@ -24,8 +24,8 @@ w = 256
 def load_image(img_src, rescale = False):
     
     img = cv2.imread(img_src)
-    rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    #rgb_img = img
+    #rgb_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    rgb_img = img
     if rescale:
         rgb_img = cv2.resize(rgb_img, (w, h))
         
@@ -217,7 +217,7 @@ def linfit( coord_array ):
 #   "cut_y_val"), then keep that point in play.
 # =============================================================================
 def keep_linear_only(coords, distances, num_neighbors,
-                     error_thresh, slope_thresh, cut_y_val,
+                     error_thresh, slope_thresh, cut_y_val, slope_cutoff = True
                     ):
 
     linear_regions = []
@@ -235,6 +235,18 @@ def keep_linear_only(coords, distances, num_neighbors,
      
     linear_regions = np.array( linear_regions )
     
+    if slope_cutoff == False:
+        linear_regions = []
+        for j, coord in enumerate(coords):
+    
+            neighbs = nearest_neighbors(coords, distances, j, num_neighbors)
+            m, b, e2 = linfit(coords[neighbs])
+            
+            if ( (e2 < error_thresh) and (coord[1] > y_thresh) ):
+                linear_regions.append(coord)
+         
+        linear_regions = np.array( linear_regions )    
+    
             
     return linear_regions
 
@@ -250,13 +262,23 @@ def keep_linear_only(coords, distances, num_neighbors,
 #   according to their relative proximity - will assume that any points
 #   belonging to the same cluster are co-linear along the boundary.
 # =============================================================================
-def cluster_lin_segments(linear_coords):
+def cluster_lin_segments(linear_coords, use_slope = False):
+    
+    if use_slope:
+        x = linear_coords[:,0]
+        y = linear_coords[:,1]
+        dydx = diff(x, y)[:, np.newaxis]
+        
+        coords = np.append(linear_coords, dydx, 1)
+    else:
+        coords = linear_coords
+    
     
     from sklearn.cluster import AffinityPropagation
     clusters = (AffinityPropagation(random_state = 42,
                                     damping = 0.8,
                                    )
-                .fit_predict(linear_coords)
+                .fit_predict(coords)
                )
 
     return clusters
@@ -630,6 +652,8 @@ def dominant_class(bbox, semantics ):
     return floor_class
 
 
+
+
 # =============================================================================
 # 
 # =============================================================================
@@ -641,3 +665,16 @@ def mask_semantics(semantics, floor_class):
 
 
 
+
+# =============================================================================
+# 
+# =============================================================================
+def create_filepath(im_name, append = '', type = 'folder' ):
+    
+    save_path = './Processed/' 
+    save_filepath = save_path + im_name + '/'
+    
+    if type == 'file':
+        save_filepath = save_filepath  + '_{}.jpg'.format( append )
+    
+    return save_filepath

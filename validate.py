@@ -20,8 +20,8 @@ def process_validation_data():
     label_path = 'F:/Image_Perspective/data/nyu_datasets_changed/labels_38/'
     
     #im_num = 910
-    min_im_num = 294
-    max_im_num = 300
+    min_im_num = 295
+    max_im_num = 1448
     
     for im_num in range(min_im_num, max_im_num):
         
@@ -40,7 +40,7 @@ def process_validation_data():
         pct_floor = num_floor_pixels/tot_pixels*100
         
         
-        save_filepath = 'F:/Insight/RoomPerspective/Validation/'
+        save_filepath = 'F:/Insight/SpaceAce/Validation/'
         
         
         floor_thresh = 20
@@ -99,13 +99,13 @@ def get_depth_error(im_name, norm = 41):
     
     m_to_ft = 3.28084
     
-    save_filepath = 'F:/Insight/RoomPerspective/Validation/'    
+    save_filepath = 'F:/Insight/SpaceAce/Validation/'    
     target_depth_path = save_filepath + 'target_depths/' + im_name + '.npy'
     processed_path = save_filepath + 'processed/' + im_name + '/_depth.npy'
     
     
     target = np.load( target_depth_path )[:,:,0]/norm
-    estimate = np.load( processed_path )[0,:,:,0]
+    estimate = np.load( processed_path )[0,:,:,0]  - 1.7
     
         
     target_size = (target.shape[1], target.shape[0])
@@ -126,31 +126,123 @@ def get_depth_error(im_name, norm = 41):
     
     abs_rel_error = np.divide( np.abs( target_cent - estim_cent), target_cent).sum()/T2
     
-    med_abs_error = np.median(error)
+    med_abs_error = np.median( abs(error) )
     
     fig, (ax1, ax2) = plt.subplots(1,2)
     
-    ax1.imshow( (target - target.min())/( target.max() - target.min() )   )
-    ax1.axis('off')
+# =============================================================================
+#     ax1.imshow( (target - target.min())/( target.max() - target.min() )   )
+#     ax1.axis('off')
+#     
+#     ax2.imshow( (estimate - estimate.min())/( estimate.max() - estimate.min() )  )
+#     ax2.axis('off')
+# =============================================================================
     
-    ax2.imshow( (estimate - estimate.min())/( estimate.max() - estimate.min() )  )
+    
+    
+    fig, (ax1, ax2) = plt.subplots(2,1)
+    
+    ax1.imshow(target*m_to_ft)
+    im = ax2.imshow(estimate*m_to_ft)
+    
+    fig.subplots_adjust(right=0.8)
+    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    fig.colorbar(im, ax = [ax1,ax2] )
+    
+    ax1.axis('off')
     ax2.axis('off')
+    plt.savefig(save_filepath + im_name + '_depth_both.jpg', dpi = 199)
+    plt.show()
+    
+    
+    error_fig, error_ax = plt.subplots(1,1)
+    
+    im = error_ax.imshow( target - estimate )
+    error_fig.colorbar(im)
+    error_ax.axis('off')
+    
 
     
     plt.savefig(save_filepath + im_name + '_depth_diff.jpg', dpi = 199)
     
-    return rmse, abs_rel_error, med_abs_error
-
-
-rmse, abs_rel_error, med_abs_error = get_depth_error( '00292' )
+    return rmse, abs_rel_error, med_abs_error, target, estimate
 
 
 
+def resize_labels(target, estimate):
+    
+    target_size = (target.shape[1], target.shape[0])
+    estimate_size =  (estimate.shape[1],estimate.shape[0])
+    
+    h_scale = target_size[0]/estimate_size[0]
+    w_scale = target_size[1]/estimate_size[1]
+    
+    new_target = np.zeros_like( estimate )
+    for x in range( estimate_size[1] ):
+        for y in range( estimate_size[0] ):
+            est_x = round( x*w_scale )
+            est_y =round( y*h_scale )
+            
+            if est_x >= estimate_size[1]:
+                est_x -= 1
+            if est_y >= estimate_size[0]:
+                est_y -= 1            
+            
+            new_target[x,y] = target[est_x, est_y]
+    
+    return new_target
 
 
-im_name = '00292'
 
-save_filepath = 'F:/Insight/RoomPerspective/Validation/'
+
+def get_segmentation_error(im_number):
+    
+    
+    save_filepath = 'F:/Insight/SpaceAce/Validation/'    
+    target_label_path = save_filepath + 'target_labels/' + im_name + '.npy'
+    processed_path = save_filepath + 'processed/' + im_name + '/_segmentation.npy'
+
+    target = np.load( target_label_path )
+    estimate = np.load( processed_path )
+    
+    label = estimate[175, 100]
+    
+    
+    target_size = (target.shape[1], target.shape[0])
+    estimate_size =  (estimate.shape[1],estimate.shape[0])
+    
+    #estimate = cv2.resize( estimate.astype('uint8')  , target_size)
+    #target = cv2.resize(target, estimate_size)
+    
+    new_target = resize_labels(target, estimate)
+    
+    estimate_masked = (estimate == label).astype(int)
+
+    fig, (ax1, ax2) = plt.subplots(1,2)
+    
+    ax1.imshow(new_target, cmap = 'Greys')
+    #ax1.axis('off')
+    ax2.imshow(estimate_masked, cmap = 'Greys' )
+    #ax2.axis('off')
+
+    plt.savefig(save_filepath + im_name + '_labels.jpg', dpi = 199)
+    
+    from sklearn.metrics import confusion_matrix
+    
+    cm = confusion_matrix( new_target.ravel(), estimate_masked.ravel() )
+
+    return target, estimate, cm
+
+
+
+im_name = '00424'
+
+rmse, abs_rel_error, med_abs_error, target, estimate = get_depth_error( im_name )
+
+label_target, label_estimate, cm = get_segmentation_error(im_name)
+
+
+save_filepath = 'F:/Insight/SpaceAce/Validation/'
 target_label_path = save_filepath + 'target_labels/' + im_name + '.npy'
 
 
@@ -163,3 +255,24 @@ fig, ax = plt.subplots(1,1)
 ax.imshow(target_labels, cmap = 'binary')
 ax.axis('off')
 plt.savefig(save_filepath + im_name + '_target_label.jpg', dpi = 199 )
+
+
+
+
+fig2, ax2 = plt.subplots(1,1)
+ax2.scatter( target.flatten(), ( (target - estimate).flatten() ), s=1)
+#plt.yscale('log')
+ax2.set_xlabel('Depth (ft)')
+ax2.set_ylabel('Error (ft)')
+plt.savefig(save_filepath + im_name + '_error_vs_depth.jpg', dpi = 199 )
+
+
+
+
+
+img = cv2.imread(  'F:/Image_Perspective/data/nyu_datasets_changed/input/' + im_name + '.jpg'  )
+
+im_fig, im_ax = plt.subplots(1,1)
+im_ax.imshow(img)
+im_ax.axis('off')
+plt.savefig(save_filepath + im_name + '_original.jpg', dpi = 199 )
