@@ -7,6 +7,7 @@ Processed/
 PlanarReconstruction/ckpt/pretrained.pt
 Validation/
 
+Demo_figures.py
 
 
 # Byte-compiled / optimized / DLL files
