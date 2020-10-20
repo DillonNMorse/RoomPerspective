@@ -91,18 +91,22 @@ st.image(image)
 # =============================================================================
 # Process image
 # =============================================================================
-d = main( img_filepath  = create_filepath(im_name, 'original', type = 'file'  ),
-          save_filepath = create_filepath(im_name),
-         )
-
-
+try:
+    d = main( img_filepath  = create_filepath(im_name, 'original', type = 'file'  ),
+              save_filepath = create_filepath(im_name),
+             )
+except:
+    'Sorry, an unexpected error occured.'
+    overlay_image = cv2.imread( create_filepath(im_name, 'depth_overlay', type = 'file') )
+    overlay_image = cv2.resize( overlay_image, (round(new_width*1.2),round(new_height*1.2)))
+    st.image(overlay_image)
 # =============================================================================
 # Load processed image
 # =============================================================================
 image_depth = cv2.imread( create_filepath(im_name, 'depthimage2', type = 'file') )
 #image_depth = cv2.resize( image_depth, (new_width,new_height))
-overlay_image = cv2.imread( create_filepath(im_name, 'depth_overlay', type = 'file') )
-overlay_image = cv2.resize( overlay_image, (round(new_width*1.2),round(new_height*1.2)))
+#overlay_image = cv2.imread( create_filepath(im_name, 'depth_overlay', type = 'file') )
+#overlay_image = cv2.resize( overlay_image, (round(new_width*1.2),round(new_height*1.2)))
 
 
 
@@ -111,7 +115,7 @@ overlay_image = cv2.resize( overlay_image, (round(new_width*1.2),round(new_heigh
 # =============================================================================
 
 st.image(image_depth)
-st.image(overlay_image)
+#st.image(overlay_image)
 
 
 'Top-down map view of room\n(works best on nearly-rectangular rooms).'
