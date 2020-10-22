@@ -99,6 +99,10 @@ def get_depth_error(im_name, norm = 41):
     
     m_to_ft = 3.28084
     
+    # =============================================================================
+    #   Load, normalize, and resize
+    # =============================================================================
+    
     save_filepath = 'F:/Insight/SpaceAce/Validation/'    
     target_depth_path = save_filepath + 'target_depths/' + im_name + '.npy'
     processed_path = save_filepath + 'processed/' + im_name + '/_depth.npy'
@@ -109,36 +113,42 @@ def get_depth_error(im_name, norm = 41):
     
         
     target_size = (target.shape[1], target.shape[0])
-    estimate_size =  (estimate.shape[1],estimate.shape[0])
+    #estimate_size =  (estimate.shape[1],estimate.shape[0])
     
     estimate = cv2.resize(estimate, target_size)
     #target = cv2.resize(target, estimate_size)
     
+    # =============================================================================
+    #     Compute error, stripping off edges of photos
+    # =============================================================================
     
-    error = (target - estimate)*m_to_ft
-    T = target.shape[0]*target.shape[1]
+    target_cent = target[40:-40, 40:-40]
+    estim_cent = estimate[40:-40, 40:-40]
+    
+    error = (target_cent - estim_cent)*m_to_ft
+    T = target_cent.shape[0]*target_cent.shape[1] # num pixels in target
     
     rmse = np.sqrt( np.multiply(error, error).sum()/T )
-    
-    target_cent = target[50:-50, 50:-50]
-    estim_cent = estimate[50:-50, 50:-50]
-    T2 = target_cent.shape[0]*target_cent.shape[1]
-    
-    abs_rel_error = np.divide( np.abs( target_cent - estim_cent), target_cent).sum()/T2
-    
+    abs_rel_error = np.divide( np.abs( error ), target_cent).sum()/T
     med_abs_error = np.median( abs(error) )
     
-    fig, (ax1, ax2) = plt.subplots(1,2)
+    depth_error_corr = np.corrcoef(error.flatten(), target_cent.flatten()  )
+    # =============================================================================
+    #     Make sure both have same min/max values for correct scaling.
+    # =============================================================================
     
-# =============================================================================
-#     ax1.imshow( (target - target.min())/( target.max() - target.min() )   )
-#     ax1.axis('off')
-#     
-#     ax2.imshow( (estimate - estimate.min())/( estimate.max() - estimate.min() )  )
-#     ax2.axis('off')
-# =============================================================================
+    maxes = [ target.max(), estimate.max() ]
+    mins  = [ target.min(), estimate.min() ]
     
+    target[0,0] = max( maxes )
+    estimate[0,0] = max( maxes )
     
+    target[0,1] = min( mins )
+    estimate[0,2] = max( mins )
+    
+    # =============================================================================
+    #   Plot target and estimate on same scale
+    # =============================================================================
     
     fig, (ax1, ax2) = plt.subplots(2,1)
     
@@ -146,26 +156,45 @@ def get_depth_error(im_name, norm = 41):
     im = ax2.imshow(estimate*m_to_ft)
     
     fig.subplots_adjust(right=0.8)
-    cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+    #cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
     fig.colorbar(im, ax = [ax1,ax2] )
     
     ax1.axis('off')
     ax2.axis('off')
-    plt.savefig(save_filepath + im_name + '_depth_both.jpg', dpi = 199)
+    plt.savefig(save_filepath + im_name + '_depth_both.jpg', dpi = 199, transparent = True)
     plt.show()
     
     
+    
+    # =============================================================================
+    #   Plot target - estimate  
+    # =============================================================================
     error_fig, error_ax = plt.subplots(1,1)
     
-    im = error_ax.imshow( target - estimate )
+    im = error_ax.imshow( target_cent - estim_cent )
     error_fig.colorbar(im)
     error_ax.axis('off')
-    
-
-    
     plt.savefig(save_filepath + im_name + '_depth_diff.jpg', dpi = 199)
     
-    return rmse, abs_rel_error, med_abs_error, target, estimate
+    
+    
+    
+    # =============================================================================
+    #     Plot error vs. depth
+    # =============================================================================
+    num_pix = len( target_cent.flatten() )
+    
+    fig2, ax2 = plt.subplots(1,1)
+    ax2.scatter( target_cent.flatten(), ( error.flatten() ), s=1)
+    ax2.plot(target_cent.flatten(), num_pix*[error.mean()], c= 'red', lw = 2 )
+    ax2.plot(target_cent.flatten(), num_pix*[error.mean() + error.std()], c= 'red', ls = '--', lw = 1 )
+    ax2.plot(target_cent.flatten(), num_pix*[error.mean() - error.std()], c= 'red', ls = '--', lw = 1 )
+    #plt.yscale('log')
+    ax2.set_xlabel('Depth (ft)')
+    ax2.set_ylabel('Error (ft)')
+    plt.savefig(save_filepath + im_name + '_error_vs_depth.jpg', dpi = 199 )
+    
+    return rmse, abs_rel_error, med_abs_error, depth_error_corr, target, estimate
 
 
 
@@ -227,6 +256,17 @@ def get_segmentation_error(im_number):
 
     plt.savefig(save_filepath + im_name + '_labels.jpg', dpi = 199)
     
+    from matplotlib.colors import LinearSegmentedColormap
+    cmap_pred = LinearSegmentedColormap.from_list('mycmap', ['white', 'red'])
+    cmap_targ = LinearSegmentedColormap.from_list('mycmap', ['white', 'blue'])
+    fig2, ax2 = plt.subplots(1,1)
+    ax2.axis('off')
+    ax2.imshow(new_target, cmap = cmap_targ, alpha = 0.4, label = 'Ground Truth'  )
+    ax2.imshow(estimate_masked, cmap = cmap_pred, alpha = 0.4, label = 'Predicted'  )
+    plt.savefig(save_filepath + im_name + '_overlayed_labels.jpg', dpi = 199,bbox_inches='tight')
+    
+    
+    
     from sklearn.metrics import confusion_matrix
     
     cm = confusion_matrix( new_target.ravel(), estimate_masked.ravel() )
@@ -237,7 +277,7 @@ def get_segmentation_error(im_number):
 
 im_name = '00424'
 
-rmse, abs_rel_error, med_abs_error, target, estimate = get_depth_error( im_name )
+rmse, abs_rel_error, med_abs_error, depth_error_corr, target, estimate = get_depth_error( im_name )
 
 label_target, label_estimate, cm = get_segmentation_error(im_name)
 
@@ -259,19 +299,15 @@ plt.savefig(save_filepath + im_name + '_target_label.jpg', dpi = 199 )
 
 
 
-fig2, ax2 = plt.subplots(1,1)
-ax2.scatter( target.flatten(), ( (target - estimate).flatten() ), s=1)
-#plt.yscale('log')
-ax2.set_xlabel('Depth (ft)')
-ax2.set_ylabel('Error (ft)')
-plt.savefig(save_filepath + im_name + '_error_vs_depth.jpg', dpi = 199 )
 
 
 
 
 
+# =============================================================================
+# Display actual photo
+# =============================================================================
 img = cv2.imread(  'F:/Image_Perspective/data/nyu_datasets_changed/input/' + im_name + '.jpg'  )
-
 im_fig, im_ax = plt.subplots(1,1)
 im_ax.imshow(img)
 im_ax.axis('off')
